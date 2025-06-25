@@ -1509,11 +1509,38 @@ defmodule Cldr.Config do
   end
 
   @doc """
+  Get the canonical timezone data
+
+  """
+  @timezones_file "timezones.json"
+  def timezones do
+    Path.join(cldr_data_dir(), @timezones_file)
+    |> File.read!()
+    |> Cldr.Config.json_library().decode!
+    |> Enum.reject(fn {_k, v} -> v == [""] end)
+    |> Map.new()
+  end
+
+  @doc """
+  Returns a mapping of valid long timezone names
+  to their canonical equivalent.
+
+  """
+  def canonical_timezones do
+    timezones()
+    |> Enum.map(fn {_short_name, zones} ->
+     [canonical | others] = zones
+     Enum.map(others, fn other -> {other, canonical} end)
+    end)
+    |> List.flatten()
+    |> Map.new()
+  end
+
+  @doc """
   Return the metazone mapping data.
 
   """
   @metazone_mapping_file "metazone_mapping.json"
-  @spec metazone_mapping :: map()
   def metazone_mapping do
     Path.join(cldr_data_dir(), @metazone_mapping_file)
     |> File.read!()
@@ -1526,12 +1553,34 @@ defmodule Cldr.Config do
 
   """
   @metazone_file "metazones.json"
-  @spec metazones :: map()
   def metazones do
     Path.join(cldr_data_dir(), @metazone_file)
     |> File.read!()
     |> json_library().decode!()
     |> Cldr.Map.atomize_keys(filter: ["from", "to"])
+  end
+
+  @doc """
+  Return the mapping from short zone to metazone.
+
+  """
+  @metazone_id_file "metazone_ids.json"
+  def metazone_ids do
+    Path.join(cldr_data_dir(), @metazone_id_file)
+    |> File.read!()
+    |> json_library().decode!()
+  end
+
+  @doc """
+  Return the primary zones for a territories.
+
+  """
+  @primary_zone_file "primary_zones.json"
+  def primary_zones do
+    Path.join(cldr_data_dir(), @primary_zone_file)
+    |> File.read!()
+    |> json_library().decode!()
+    |> Cldr.Map.atomize_keys()
   end
 
   @doc """
