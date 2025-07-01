@@ -34,9 +34,6 @@ defmodule Cldr.Timezone do
                             {nil, _} ->
                               nil
 
-                            {:UT = territory, v} ->
-                              {territory, Elixir.List.flatten(v)}
-
                             {k, v} ->
                               case Cldr.validate_territory(k) do
                                 {:ok, territory} -> {territory, Elixir.List.flatten(v)}
